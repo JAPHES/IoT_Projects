@@ -1,0 +1,52 @@
+
+#include <SoftwareSerial.h>
+#include <DFRobot_DHT11.h>
+
+// SIM800L Setup
+String apn = "safaricom";  // APN
+String apn_u = "saf";      // APN-Username
+String apn_p = "data";     // APN-Password
+String url = "http://138.91.107.57/webserver/data.php"; // URL of Server
+SoftwareSerial mySerial(11, 12); // sim800l_TX_pin, sim800l_RX_pin
+String data = "";
+
+// Sensor and Pin Definitions
+#define Sensor A3
+#define DHT11_PIN 2
+int red = 5; // Relay pin
+DFRobot_DHT11 DHT;
+
+void setup() {
+  pinMode(red, OUTPUT); // Set relay pin as output
+  
+  mySerial.begin(9600);
+  delay(500);
+  
+  while (mySerial.available()) {
+    Serial.write(mySerial.read());
+  }
+
+  Serial.begin(9600);
+}
+
+void loop() {
+  // Read temperature and humidity
+  DHT.read(DHT11_PIN);
+  Serial.print("Temp: ");
+  Serial.print(DHT.temperature);
+  Serial.print("  Humi: ");
+  Serial.println(DHT.humidity);
+  
+  delay(10);
+
+  // Read analog sensor value
+  int value = analogRead(Sensor);
+  Serial.println(value);
+
+  // Control relay based on conditions
+  if (value > 120 || DHT.temperature > 35) {
+    digitalWrite(red, HIGH); // Turn on the relay
+  } else {
+    digitalWrite(red, LOW); // Turn off the relay
+  }
+}
